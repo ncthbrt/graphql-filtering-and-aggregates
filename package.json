@@ -2,8 +2,9 @@
   "name": "graphql-middleware-example",
   "version": "1.0.0",
   "description": "This repository serves as an example of how to leverage the unique features of GraphQL to neatly encapsulate cross cutting concerns. The example was prepared for a [soapbox](https://en.wikipedia.org/wiki/Soapbox) held at Stitch on the 4th of November 2020.",
+  "main": "./lib/dateformatting-middleware.js",
   "scripts": {
-    "dev": "tsnd --poll ./src/server.ts",
+    "dev": "tsnd --poll ./example/server.ts",
     "typecheck": "tsc --noEmit",
     "graphql-codegen": "graphql-codegen",
     "generate": "graphql-codegen --config codegen.yml"
@@ -11,14 +12,18 @@
   "dependencies": {
     "apollo-server-koa": "^2.19.0",
     "graphql-compose": "^7.22.1",
-    "koa": "^2.13.0"
+    "koa": "^2.13.0",
+    "luxon": "^1.25.0"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^1.19.0",
     "@graphql-codegen/introspection": "^1.18.0",
     "@graphql-codegen/typescript": "^1.17.11",
     "@graphql-codegen/typescript-resolvers": "^1.17.10",
+    "@types/jest": "^26.0.15",
+    "@types/luxon": "^1.25.0",
     "@types/node": "^14.14.6",
+    "ts-jest": "^26.4.4",
     "ts-node-dev": "^1.0.0",
     "typescript": "^4.0.5"
   },

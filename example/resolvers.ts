@@ -9,6 +9,7 @@ export default function resolvers(): Resolvers<unknown> & Resolvers & IResolvers
                     age: 8,
                     firstName: 'Oliver',
                     familyName: 'Jones',
+                    dateOfBirth: '1994-02-21T00:00:00.000Z',
                     fullName: 'Oliver Gracy Jones',
                     favouriteFoods: ['Bananna', 'Pizza', 'Tadpoles']
                 }

@@ -1,4 +1,4 @@
-import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
+import { GraphQLResolveInfo } from 'graphql';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 /** All built-in and custom scalars, mapped to their actual values */
@@ -8,15 +8,12 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  Date: any;
 };
-
 
 export type User = {
   __typename?: 'User';
   favouriteFoods: Array<Scalars['String']>;
   age: Scalars['Int'];
-  dateOfBirth: Scalars['Date'];
   firstName: Scalars['String'];
   familyName?: Maybe<Scalars['String']>;
   fullName: Scalars['String'];
@@ -105,7 +102,6 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
-  Date: ResolverTypeWrapper<Scalars['Date']>;
   User: ResolverTypeWrapper<User>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
@@ -115,7 +111,6 @@ export type ResolversTypes = {
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
-  Date: Scalars['Date'];
   User: User;
   String: Scalars['String'];
   Int: Scalars['Int'];
@@ -123,14 +118,9 @@ export type ResolversParentTypes = {
   Boolean: Scalars['Boolean'];
 };
 
-export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
-  name: 'Date';
-}
-
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
   favouriteFoods?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   age?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  dateOfBirth?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   firstName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   familyName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -142,7 +132,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
 };
 
 export type Resolvers<ContextType = any> = {
-  Date?: GraphQLScalarType;
   User?: UserResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
 };
