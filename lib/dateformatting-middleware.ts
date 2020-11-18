@@ -1,5 +1,5 @@
 import { ComposeOutputType, ListComposer, NamedTypeComposer, NonNullComposer, ObjectTypeComposer, ObjectTypeComposerFieldConfig, ScalarTypeComposer, SchemaComposer, ThunkComposer } from "graphql-compose";
-import { DateTime, FixedOffsetZone, IANAZone } from "luxon";
+import { DateTime, IANAZone } from "luxon";
 
 function injectArgs(fieldConfig: ObjectTypeComposerFieldConfig<any, any>, composer: SchemaComposer<any>) {
     if (!fieldConfig.args) {
@@ -36,7 +36,7 @@ function baseTransform(value: any, dateFormat?: DateFormat, dateFormatLocale?: F
     let dt: null | DateTime = null;
 
     if (typeof value === 'string') {
-        dt = DateTime.fromISO(value, { zone: FixedOffsetZone.utcInstance });
+        dt = DateTime.fromISO(value);
     } else if (value instanceof Date) {
         dt = DateTime.fromJSDate(value);
     } else {
