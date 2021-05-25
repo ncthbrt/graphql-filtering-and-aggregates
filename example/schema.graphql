@@ -1,12 +1,36 @@
-scalar DateTime
+scalar Cursor
+
+type Food {
+    name: String    
+    
+    pricePerKg: Float!
+}
+
+type FoodEdge {
+    node: Food!
+    cursor: Cursor!
+}
+
+
+""" Information about pagination in a connection. """
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+  """When paginating backwards, the cursor to continue."""
+  startCursor: Cursor
+  """When paginating forwards, the cursor to continue."""
+  endCursor: Cursor
+}
+
+type FoodConnection {
+    edges: [FoodEdge!]!
+    pageInfo: PageInfo!
+}
 
 type User {
-    favouriteFoods: [String!]!
-    age: Int!
-    dateOfBirth: DateTime!
-    firstName: String!
-    familyName: String
-    fullName: String!
+    favouriteFoods: FoodConnection    
 }
 
 type Query {
