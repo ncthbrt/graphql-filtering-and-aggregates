@@ -1,5 +1,5 @@
-import { GraphQLObjectType } from "graphql";
-import { SchemaComposer, ObjectTypeComposer } from "graphql-compose";
+import { GraphQLList, GraphQLObjectType } from "graphql";
+import { SchemaComposer, ObjectTypeComposer, ListComposer, NonNullComposer, NamedTypeComposer } from "graphql-compose";
 
 
 function maybeInjectAggregates(typeComposer: ObjectTypeComposer, _schemaComposer: SchemaComposer<any>) {
@@ -14,6 +14,35 @@ function maybeInjectAggregates(typeComposer: ObjectTypeComposer, _schemaComposer
     if (!typeComposer.getDirectiveByName('injectAggregate')) {
         return;
     }
+
+    const edgesField = typeComposer.getField('edges');
+    if (!edgesField) {
+        console.warn('injectAggregate requires that the type it is specified on has edges');
+        return;
+    }
+
+    let edgesType = edgesField.type;
+    let edgeType: NamedTypeComposer<any>;
+    if (edgesType instanceof NonNullComposer) {
+        if (!(edgesType.getType() instanceof GraphQLList)) {
+            console.warn('injectAggregate requires that the type it is specified is has an edge field made up of a list of edges');
+            return;
+        }
+        edgeType = edgesType.getUnwrappedTC();
+    } else if (edgesType instanceof ListComposer) {
+        edgeType = edgesType.getUnwrappedTC();
+    } else {
+        console.warn('injectAggregate requires that the type it is specified is has an edge field made up of a list of edges');
+        return;
+    }
+
+    // Need to validate that the edge type conforms to the relay spec.
+    // This means it must be an object, and that it needs a node field
+    if (!(edgeType instanceof ObjectTypeComposer)) {
+        console.warn('injectAggregate requires that type of edges conforms to the relay spec. We have detected a non-object edge');
+        return;
+    }
+
 }
 
 export function addInjectAggregateDirective<Composer extends SchemaComposer<unknown>>(composer: Composer) {
