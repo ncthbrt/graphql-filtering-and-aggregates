@@ -24,7 +24,7 @@ type PageInfo {
   endCursor: Cursor
 }
 
-type FoodConnection {
+type FoodConnection @injectAggregate {
     edges: [FoodEdge!]!
     pageInfo: PageInfo!
 }
