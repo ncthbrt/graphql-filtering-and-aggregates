@@ -2,12 +2,13 @@ import { GraphQLList, GraphQLObjectType } from "graphql";
 import { SchemaComposer, ObjectTypeComposer, ListComposer, NonNullComposer, NamedTypeComposer, isNamedTypeComposer, ComposeNamedOutputType, schemaComposer, ObjectTypeComposerFieldConfigAsObjectDefinition } from "graphql-compose";
 
 type AggregateBuilder = (typeComposer: ObjectTypeComposer, nodeComposer: ComposeNamedOutputType<any>, schemaComposer: SchemaComposer<any>) =>
-    ObjectTypeComposerFieldConfigAsObjectDefinition<{ node: any }, any>;
+    ObjectTypeComposerFieldConfigAsObjectDefinition<{ edges?: { node: any }[] }, any>;
+
 
 const aggregates: { [key: string]: AggregateBuilder } = {
     count: (_tc, _nC, schemaComposer) => ({
         type: schemaComposer.getSTC('Number').NonNull,
-        resolve: () => 0
+        resolve: (parent) => parent.edges?.length ?? 0
     })
 };
 
