@@ -1,6 +1,23 @@
-import { GraphQLList, GraphQLObjectType } from "graphql";
-import { SchemaComposer, ObjectTypeComposer, ListComposer, NonNullComposer, NamedTypeComposer } from "graphql-compose";
+import { GraphQLList, GraphQLObjectType, GraphQLFieldConfig } from "graphql";
+import { SchemaComposer, ObjectTypeComposer, ListComposer, NonNullComposer, NamedTypeComposer, isNamedTypeComposer, ComposeNamedOutputType, schemaComposer } from "graphql-compose";
 
+
+
+type AggregateBuilder = (typeComposer: ObjectTypeComposer, nodeComposer: ComposeNamedOutputType<any>, schemaComposer: SchemaComposer<any>) =>
+    GraphQLFieldConfig<{ node: any }, any>;
+
+const aggregates: { [key: string]: AggregateBuilder } = {
+    count: (_tc, _nC, schemaComposer) => ({
+        type: schemaComposer.getSTC('Number').getType(),
+        resolve: () => 0
+    })
+};
+
+function injectAggregates(typeComposer: ObjectTypeComposer, _nodeComposer: ComposeNamedOutputType<any>, _schemaComposer: SchemaComposer<any>) {
+    typeComposer.addFields({});
+
+    // typeComposer.addFields()
+}
 
 function maybeInjectAggregates(typeComposer: ObjectTypeComposer, _schemaComposer: SchemaComposer<any>) {
     const type: GraphQLObjectType & { __wasVisitedByAggregateExtension?: boolean } = typeComposer.getType();
@@ -43,6 +60,27 @@ function maybeInjectAggregates(typeComposer: ObjectTypeComposer, _schemaComposer
         return;
     }
 
+    if (!edgeType.hasField('node')) {
+        console.warn('injectAggregate requires that type of edges conforms to the relay spec. We have detected an edge that doesn\t have a node field');
+        return;
+    }
+
+
+    const nodeField = edgeType.getField('node');
+    let nodeTypeComposer = nodeField.type;
+    let namedNodeTypeComposer: ComposeNamedOutputType<any>;
+    // Need to validate that the edge type conforms to the relay spec.
+    // This means it must be either a named type or a non-null named type
+    if (nodeTypeComposer instanceof NonNullComposer) {
+        namedNodeTypeComposer = nodeTypeComposer.getUnwrappedTC() as ComposeNamedOutputType<any>;
+    } else if (isNamedTypeComposer(nodeTypeComposer)) {
+        namedNodeTypeComposer = nodeTypeComposer;
+    } else {
+        console.warn('injectAggregate requires that type of node conforms to the relay spec. We have detected node isn\'t a named type or a non-null named type field');
+        return;
+    }
+
+    injectAggregates(typeComposer, namedNodeTypeComposer, _schemaComposer);
 }
 
 export function addInjectAggregateDirective<Composer extends SchemaComposer<unknown>>(composer: Composer) {
