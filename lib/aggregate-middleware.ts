@@ -1,22 +1,24 @@
-import { GraphQLList, GraphQLObjectType, GraphQLFieldConfig } from "graphql";
-import { SchemaComposer, ObjectTypeComposer, ListComposer, NonNullComposer, NamedTypeComposer, isNamedTypeComposer, ComposeNamedOutputType, schemaComposer } from "graphql-compose";
-
-
+import { GraphQLList, GraphQLObjectType } from "graphql";
+import { SchemaComposer, ObjectTypeComposer, ListComposer, NonNullComposer, NamedTypeComposer, isNamedTypeComposer, ComposeNamedOutputType, schemaComposer, ObjectTypeComposerFieldConfigAsObjectDefinition } from "graphql-compose";
 
 type AggregateBuilder = (typeComposer: ObjectTypeComposer, nodeComposer: ComposeNamedOutputType<any>, schemaComposer: SchemaComposer<any>) =>
-    GraphQLFieldConfig<{ node: any }, any>;
+    ObjectTypeComposerFieldConfigAsObjectDefinition<{ node: any }, any>;
 
 const aggregates: { [key: string]: AggregateBuilder } = {
     count: (_tc, _nC, schemaComposer) => ({
-        type: schemaComposer.getSTC('Number').getType(),
+        type: schemaComposer.getSTC('Number').NonNull,
         resolve: () => 0
     })
 };
 
-function injectAggregates(typeComposer: ObjectTypeComposer, _nodeComposer: ComposeNamedOutputType<any>, _schemaComposer: SchemaComposer<any>) {
-    typeComposer.addFields({});
+function injectAggregates(typeComposer: ObjectTypeComposer, nodeComposer: ComposeNamedOutputType<any>, schemaComposer: SchemaComposer<any>) {
+    const fields =
+        Object.entries(aggregates)
+            .map(([fieldName, aggregate]) => ({ [fieldName]: aggregate(typeComposer, nodeComposer, schemaComposer) }))
+            .reduce(Object.assign, {});
 
-    // typeComposer.addFields()
+    typeComposer.addFields(fields);
+
 }
 
 function maybeInjectAggregates(typeComposer: ObjectTypeComposer, _schemaComposer: SchemaComposer<any>) {
