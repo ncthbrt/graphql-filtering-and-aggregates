@@ -1,24 +1,34 @@
 import { GraphQLList, GraphQLObjectType } from "graphql";
-import { SchemaComposer, ObjectTypeComposer, ListComposer, NonNullComposer, NamedTypeComposer, isNamedTypeComposer, ComposeNamedOutputType, schemaComposer, ObjectTypeComposerFieldConfigAsObjectDefinition } from "graphql-compose";
+import { SchemaComposer, ObjectTypeComposer, ListComposer, NonNullComposer, NamedTypeComposer, isNamedTypeComposer, ComposeNamedOutputType, ObjectTypeComposerFieldConfigAsObjectDefinition } from "graphql-compose";
 
 type AggregateBuilder = (typeComposer: ObjectTypeComposer, nodeComposer: ComposeNamedOutputType<any>, schemaComposer: SchemaComposer<any>) =>
     ObjectTypeComposerFieldConfigAsObjectDefinition<{ edges?: { node: any }[] }, any>;
 
 
 const aggregates: { [key: string]: AggregateBuilder } = {
-    count: (_tc, _nC, schemaComposer) => ({
-        type: schemaComposer.getSTC('Number').NonNull,
+    count: (_tc, _nC, _schemaComposer) => ({
+        type: 'Int!',
         resolve: (parent) => parent.edges?.length ?? 0
     })
 };
 
-function injectAggregates(typeComposer: ObjectTypeComposer, nodeComposer: ComposeNamedOutputType<any>, schemaComposer: SchemaComposer<any>) {
-    const fields =
-        Object.entries(aggregates)
-            .map(([fieldName, aggregate]) => ({ [fieldName]: aggregate(typeComposer, nodeComposer, schemaComposer) }))
-            .reduce(Object.assign, {});
+function addScalarTypesIfNotPresent(schemaComposer: SchemaComposer<any>) {
+    schemaComposer.add(
+        `scalar Int`
+    );
+}
 
-    typeComposer.addFields(fields);
+function injectAggregates(typeComposer: ObjectTypeComposer, nodeComposer: ComposeNamedOutputType<any>, schemaComposer: SchemaComposer<any>) {
+
+
+    Object.entries(aggregates)
+        .map<[string, ObjectTypeComposerFieldConfigAsObjectDefinition<{ edges?: { node: any }[] }, any>]>(([fieldName, aggregate]) => ([fieldName, aggregate(typeComposer, nodeComposer, schemaComposer)]))
+        .forEach(([fieldName, aggregate]) => {
+            typeComposer.addFields({
+                [fieldName]: aggregate
+            });
+        });
+
 
 }
 
@@ -87,7 +97,7 @@ function maybeInjectAggregates(typeComposer: ObjectTypeComposer, _schemaComposer
 }
 
 export function addInjectAggregateDirective<Composer extends SchemaComposer<unknown>>(composer: Composer) {
-    composer.addTypeDefs(`
+    composer.add(`
         """
         If this directive is included on an connection, it'll automatically add aggregate resolvers to the connection.
         """
@@ -97,6 +107,7 @@ export function addInjectAggregateDirective<Composer extends SchemaComposer<unkn
 }
 
 export function injectAggregatesMiddleware<Composer extends SchemaComposer<unknown>>(composer: Composer) {
+    addScalarTypesIfNotPresent(composer);
     // Iterate over all types, plucking out those that are concrete types
     for (let typeComposer of composer.types.values()) {
         if (!(typeComposer instanceof ObjectTypeComposer)) {

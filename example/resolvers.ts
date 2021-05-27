@@ -6,12 +6,17 @@ export default function resolvers(): Resolvers<unknown> & Resolvers & IResolvers
         Query: {
             user: () => {
                 return {
-                    age: 8,
-                    firstName: 'Oliver',
-                    familyName: 'Jones',
-                    dateOfBirth: '1994-02-21T00:00:00.000Z',
-                    fullName: 'Oliver Gracy Jones',
-                    favouriteFoods: ['Bananna', 'Pizza', 'Tadpoles']
+                    favouriteFoods: {
+                        pageInfo: {
+                            hasNextPage: false,
+                            hasPreviousPage: false
+                        },
+                        edges: [
+                            { node: { name: 'Bananna', pricePerKg: 10 }, cursor: 'abc' },
+                            { node: { name: 'Pizza', pricePerKg: 10 }, cursor: 'abc' },
+                            { node: { name: 'Tadpoles', pricePerKg: 10, }, cursor: 'abc' }
+                        ]
+                    }
                 }
             }
         }

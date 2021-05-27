@@ -1,8 +1,13 @@
+"""
+If this directive is included on an connection, it'll automatically add aggregate resolvers to the connection.
+"""
+directive @injectAggregate on    
+| OBJECT
+
 scalar Cursor
 
 type Food {
     name: String    
-    
     pricePerKg: Float!
 }
 
@@ -25,7 +30,7 @@ type PageInfo {
 }
 
 type FoodConnection @injectAggregate {
-    edges: [FoodEdge!]!
+    edges: [FoodEdge]
     pageInfo: PageInfo!
 }
 
